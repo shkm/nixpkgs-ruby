@@ -3,10 +3,15 @@
 
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.05";
+  inputs.rvm = {
+    url = "github:rvm/rvm";
+    flake = false;
+  };
   outputs =
     { self
     , nixpkgs
     , flake-utils
+    , rvm
     }: {
       lib = {
         versions = import ./versions;
@@ -19,6 +24,7 @@
           }:
           (self.lib.getRubyVersionEntry rubyVersion).derivation {
             inherit pkgs;
+            rvmSrc = rvm;
           };
       };
 
@@ -52,6 +58,10 @@
         };
         ruby-3_0 = mkRuby {
           rubyVersion = "3.0.*";
+          inherit pkgs;
+        };
+        ruby-2_6_9 = mkRuby {
+          rubyVersion = "2.6.9";
           inherit pkgs;
         };
         ruby-2_7 = mkRuby {

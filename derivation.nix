@@ -5,6 +5,7 @@
   ...
 }: {
   pkgs,
+  rvmSrc,
 }: let
   mkRubyVersion = pkgs.callPackage ./lib/ruby-version.nix {};
   rubyVersion =
@@ -33,6 +34,6 @@ in
   pkgs.callPackage ./lib/default.nix {
     inherit (pkgs.darwin.apple_sdk.frameworks) Foundation;
   } {
-    inherit rubySrc rubygemsSrc;
+    inherit rubySrc rubygemsSrc rvmSrc;
     version = rubyVersion;
   }

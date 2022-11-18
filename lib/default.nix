@@ -21,6 +21,7 @@
   bundler,
   bundix,
   Foundation,
+  patchsets ? [ ]
 } @ args: let
   op = lib.optional;
   ops = lib.optionals;
@@ -40,6 +41,7 @@
     version,
     rubySrc,
     rubygemsSrc,
+    rvmSrc,
   }: let
     tag = version.gitTag;
 
@@ -110,7 +112,31 @@
 
         enableParallelBuilding = true;
 
+        inherit patchsets;
+
         postPatch = ''
+          for patchset in $patchsets
+          do
+            patchset_path="${rvmSrc}/patchsets/ruby/${version}/$patchset"
+            if [ ! -f "$patchset_path" ]
+            then
+              echo "Patchset not found: $patchset_path" >&2
+              exit 1
+            fi
+
+            while read patch
+            do
+              patch_path="${rvmSrc}/patches/ruby/${version}/$patch.patch"
+              if [ -f "$patch_path" ]
+              then
+                patch -p1 < "$patch_path"
+              else
+                echo "Patch not found: $patch_path" >&2
+                exit 1
+              fi
+            done < ${rvmSrc}/patchsets/ruby/${version}/$patchset
+          done
+
           cp -rL --no-preserve=mode,ownership ${rubygemsSrc} ./rubygems
 
           if [ -f configure.ac ]
